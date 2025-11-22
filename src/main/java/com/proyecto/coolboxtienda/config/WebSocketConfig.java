@@ -23,4 +23,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOrigins("*")
                 .withSockJS();
     }
+    // Trigger recompilation
 }

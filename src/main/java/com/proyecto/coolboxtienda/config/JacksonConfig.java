@@ -19,4 +19,5 @@ public class JacksonConfig {
                 .dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"))
                 .build();
     }
+    // Trigger recompilation
 }
