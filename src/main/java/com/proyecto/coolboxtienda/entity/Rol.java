@@ -22,4 +22,10 @@ public class Rol {
 
     @Column(name = "descripcion_rol", columnDefinition = "TEXT")
     private String descripcionRol;
+
+    @Column(name = "tipo_acceso", length = 50)
+    private String tipoAcceso; // ERP, WEB, MOVIL, or combinations like "ERP,WEB"
+
+    @Column(name = "activo")
+    private Boolean activo = true;
 }

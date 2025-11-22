@@ -38,4 +38,10 @@ public class ChatMessage {
 
     @Column(name = "tipo_mensaje", length = 20)
     private String tipoMensaje = "TEXT"; // TEXT, FILE, IMAGE
+
+    @Column(name = "url_archivo", columnDefinition = "TEXT")
+    private String urlArchivo; // S3 reference for file attachments
+
+    @Column(name = "es_fijado")
+    private Boolean esFijado = false;
 }

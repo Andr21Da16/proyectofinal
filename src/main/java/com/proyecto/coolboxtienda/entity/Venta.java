@@ -47,4 +47,12 @@ public class Venta {
 
     @Column(name = "descuento_aplicado", precision = 10, scale = 2)
     private BigDecimal descuentoAplicado = BigDecimal.ZERO;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente")
+    private Cliente cliente;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_pedido")
+    private Pedido pedido;
 }
