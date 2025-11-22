@@ -1509,3 +1509,39 @@ Ejemplo: `GET /productos?page=0&size=10&sort=nombreProducto,asc`
 
 **Última actualización:** Enero 2025  
 **Versión de la API:** 1.0.0
+
+---
+
+## ❗ ¿Qué le falta para estar perfecta?
+
+Esta sección detalla las áreas de mejora identificadas para alcanzar una madurez completa de la API.
+
+### 🔹 Inteligencia Artificial Contextual
+- **Endpoints Específicos:** Faltan endpoints dedicados para generar contenido con contexto específico, como:
+  - `POST /ai/generar-campania`: Para crear descripciones y estrategias de campañas basadas en tendencias.
+  - `POST /ai/producto-promocion`: Para sugerir qué productos poner en promoción según stock y ventas históricas.
+- **Ejemplos de Uso:** Falta documentar ejemplos concretos del uso de `GeminiAIService` pasando el parámetro `contextoModulo` para afinar las respuestas de la IA.
+
+### 🔹 Seguridad y Control de Acceso Granular
+- **Roles por Endpoint:** La documentación actual no especifica explícitamente qué roles (ADMIN, GERENTE, VENDEDOR, CLIENTE) son necesarios para cada endpoint individual.
+- **Validación de Tipo de Acceso:** No se aclara cómo se valida el `tipoAcceso` del rol (ERP vs WEB vs MÓVIL) en cada endpoint para prevenir accesos cruzados no autorizados.
+- **Integración Swagger:** Falta explicar cómo se visualizan los módulos en Swagger UI según los permisos del usuario autenticado.
+
+### 🔹 Clasificación de Endpoints por Plataforma
+- **ERP vs Web vs Móvil:** Aunque se deduce por el contexto, sería ideal marcar explícitamente cada endpoint con etiquetas como `[ERP]`, `[WEB]`, o `[MOVIL]` para mayor claridad en la integración.
+
+### 🔹 Business Intelligence (BI) y Métricas
+- **Endpoints de Métricas:** Faltan endpoints para obtener datos agregados para dashboards, tales como:
+  - `GET /bi/top-clientes`: Listado de mejores clientes.
+  - `GET /bi/kpis`: Indicadores clave de rendimiento (ventas diarias, ticket promedio).
+  - `GET /bi/conversion`: Tasas de conversión de carritos a ventas.
+- **Informes Exportables:** No se detallan endpoints para generar y descargar reportes en formatos como CSV, PDF o Excel (`GET /reportes/ventas/exportar`).
+
+### 🔹 Funcionalidades Avanzadas de Chat
+- **Gestión de Mensajes:**
+  - `PUT /chat/mensajes/{id}/fijar`: Endpoint para marcar mensajes importantes.
+  - `GET /chat/mensajes/no-leidos`: Endpoint para obtener el conteo de mensajes no leídos por usuario o sala.
+
+### 🔹 Flujos de Negocio Complejos
+- **Conversión Automática:** Faltan endpoints o documentación sobre el proceso de cierre automático de `Pedido` a `Venta` (conversión) y cómo se maneja la transacción.
+- **Logística y Transporte:** No se mencionan endpoints para la transferencia de pedidos hacia un módulo de logística móvil o integración con proveedores de transporte.
