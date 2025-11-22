@@ -71,19 +71,25 @@ public class AuthServiceImpl implements AuthService {
                 Colaborador colaborador = entityMapper.toColaboradorEntity(request, rol, sucursal, hashedPassword);
                 colaborador = colaboradorRepository.save(colaborador);
 
-                // Generar token
+                // Generar token con claims
                 org.springframework.security.core.userdetails.User userDetails = new org.springframework.security.core.userdetails.User(
                                 colaborador.getUsuarioColaborador(),
                                 colaborador.getContraseñaColaborador(),
                                 new java.util.ArrayList<>());
-                String token = jwtTokenProvider.generateToken(userDetails);
+
+                java.util.Map<String, Object> extraClaims = new java.util.HashMap<>();
+                extraClaims.put("tipoUsuario", "COLABORADOR");
+                extraClaims.put("tipoAcceso", colaborador.getRol().getTipoAcceso());
+                extraClaims.put("idColaborador", colaborador.getIdColaborador());
+
+                String token = jwtTokenProvider.generateTokenWithClaims(userDetails, extraClaims);
 
                 // Obtener permisos del rol
                 List<PermisoResponse> permisos = getPermisosByRol(colaborador.getRol().getIdRol());
 
                 return AuthResponse.builder()
                                 .token(token)
-                                .colaborador(entityMapper.toColaboradorResponse(colaborador))
+                                .usuario(entityMapper.toColaboradorResponse(colaborador))
                                 .permisos(permisos)
                                 .tipoAcceso(colaborador.getRol().getTipoAcceso())
                                 .build();
@@ -102,19 +108,26 @@ public class AuthServiceImpl implements AuthService {
                 // Generar token usando el UserDetails del Authentication
                 org.springframework.security.core.userdetails.UserDetails userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication
                                 .getPrincipal();
-                String token = jwtTokenProvider.generateToken(userDetails);
 
                 // Obtener colaborador
                 Colaborador colaborador = colaboradorRepository
                                 .findByUsuarioColaborador(request.getUsuarioColaborador())
                                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+                // Add extra claims
+                java.util.Map<String, Object> extraClaims = new java.util.HashMap<>();
+                extraClaims.put("tipoUsuario", "COLABORADOR");
+                extraClaims.put("tipoAcceso", colaborador.getRol().getTipoAcceso());
+                extraClaims.put("idColaborador", colaborador.getIdColaborador());
+
+                String token = jwtTokenProvider.generateTokenWithClaims(userDetails, extraClaims);
+
                 // Obtener permisos del rol
                 List<PermisoResponse> permisos = getPermisosByRol(colaborador.getRol().getIdRol());
 
                 return AuthResponse.builder()
                                 .token(token)
-                                .colaborador(entityMapper.toColaboradorResponse(colaborador))
+                                .usuario(entityMapper.toColaboradorResponse(colaborador))
                                 .permisos(permisos)
                                 .tipoAcceso(colaborador.getRol().getTipoAcceso())
                                 .build();
@@ -146,10 +159,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         private List<PermisoResponse> getPermisosByRol(Integer idRol) {
-                List<RolPermiso> rolPermisos = rolPermisoRepository.findAllByIdRol(idRol);
+                List<RolPermiso> rolPermisos = rolPermisoRepository.findAllByRol_IdRol(idRol);
                 return rolPermisos.stream()
                                 .map(rp -> PermisoResponse.builder()
-                                                .nombreModulo(rp.getId().getNombreModulo())
+                                                .nombreModulo(rp.getNombreModulo())
                                                 .puedeVer(rp.getPuedeVer())
                                                 .puedeEditar(rp.getPuedeEditar())
                                                 .puedeCrear(rp.getPuedeCrear())

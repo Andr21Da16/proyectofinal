@@ -27,4 +27,6 @@ public interface ProductoService {
     List<ProductoResponse> getProductosByMarca(String marca);
 
     List<String> getAllMarcas();
+
+    List<ProductoResponse> getAllProductosAllBranches();
 }

@@ -144,4 +144,15 @@ public class ProductoServiceImpl implements ProductoService {
     public List<String> getAllMarcas() {
         return productoRepository.findAllMarcas();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductoResponse> getAllProductosAllBranches() {
+        // Obtener todos los productos de todas las sucursales sin excepción
+        List<SucursalProducto> allInventory = sucursalProductoRepository.findAll();
+        return allInventory.stream()
+                .map(sp -> entityMapper.toProductoResponse(sp.getProducto()))
+                .distinct()
+                .collect(Collectors.toList());
+    }
 }

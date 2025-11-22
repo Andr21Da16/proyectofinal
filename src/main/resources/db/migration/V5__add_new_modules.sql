@@ -4,13 +4,14 @@ ALTER TABLE roles ADD COLUMN IF NOT EXISTS tipo_acceso VARCHAR(50);
 ALTER TABLE roles ADD COLUMN IF NOT EXISTS activo BOOLEAN DEFAULT true;
 
 CREATE TABLE IF NOT EXISTS rol_permiso (
+    id_permiso SERIAL PRIMARY KEY,
     id_rol INTEGER NOT NULL,
     nombre_modulo VARCHAR(100) NOT NULL,
     puede_ver BOOLEAN DEFAULT false,
     puede_editar BOOLEAN DEFAULT false,
     puede_crear BOOLEAN DEFAULT false,
     puede_eliminar BOOLEAN DEFAULT false,
-    PRIMARY KEY (id_rol, nombre_modulo),
+    UNIQUE(id_rol, nombre_modulo),
     FOREIGN KEY (id_rol) REFERENCES roles(id_rol) ON DELETE CASCADE
 );
 
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     tipo_documento VARCHAR(20),
     numero_documento VARCHAR(50) UNIQUE,
     id_ciudad INTEGER,
+    password VARCHAR(255),
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT true,
     FOREIGN KEY (id_ciudad) REFERENCES ciudad(id_ciudad)

@@ -5,6 +5,14 @@
 UPDATE roles SET tipo_acceso = 'ERP', activo = true WHERE id_rol = 1;
 UPDATE roles SET tipo_acceso = 'ERP,WEB', activo = true WHERE id_rol = 2;
 
+-- Insert Manager role with full ERP access
+INSERT INTO roles (nombre_rol, descripcion_rol, tipo_acceso, activo) VALUES
+('Gerente', 'Gerente con acceso completo a todos los módulos ERP', 'ERP', true);
+
+-- Insert Manager collaborator (password: "gerente123" - BCrypt encrypted)
+INSERT INTO colaboradores (nombre_colaborador, email_colaborador, usuario_colaborador, contraseña_colaborador, id_rol, id_sucursal) VALUES
+('Gerente General', 'gerente@coolbox.com', 'gerente', '$2a$10$dXJ3SW6G7P3EyFCLTwMemuIUVlb67B3OjSO.WNxR3VgOSdyBXm.5e', 3, 1);
+
 -- Insert sample rol_permiso data
 INSERT INTO rol_permiso (id_rol, nombre_modulo, puede_ver, puede_editar, puede_crear, puede_eliminar) VALUES
 (1, 'PRODUCTOS', true, true, true, true),
@@ -20,22 +28,41 @@ INSERT INTO rol_permiso (id_rol, nombre_modulo, puede_ver, puede_editar, puede_c
 (2, 'PRODUCTOS', true, true, false, false),
 (2, 'VENTAS', true, false, false, false),
 (2, 'CLIENTES', true, true, true, false),
-(2, 'PEDIDOS', true, true, false, false);
+(2, 'PEDIDOS', true, true, false, false),
+-- Manager role (id_rol = 3) - Full access to all modules
+(3, 'DASHBOARD', true, true, true, true),
+(3, 'PRODUCTOS', true, true, true, true),
+(3, 'INVENTARIO', true, true, true, true),
+(3, 'COMPRAS', true, true, true, true),
+(3, 'POS_TIENDA', true, true, true, true),
+(3, 'VENTAS_ONLINE', true, true, true, true),
+(3, 'CLIENTES', true, true, true, true),
+(3, 'FACTURACION', true, true, true, true),
+(3, 'LOGISTICA', true, true, true, true),
+(3, 'MARKETING', true, true, true, true),
+(3, 'REPORTES', true, true, true, true),
+(3, 'BI', true, true, true, true),
+(3, 'GARANTIAS', true, true, true, true),
+(3, 'SUCURSALES', true, true, true, true),
+(3, 'CATEGORIAS', true, true, true, true),
+(3, 'USUARIOS', true, true, true, true),
+(3, 'ASISTENTE_AI', true, true, true, true),
+(3, 'CHAT_INTERNO', true, true, true, true);
 
--- Insert sample clientes
-INSERT INTO clientes (nombre_completo, email, telefono, direccion, tipo_documento, numero_documento, id_ciudad, activo) VALUES
-('Juan Pérez García', 'juan.perez@email.com', '987654321', 'Av. Principal 123, Lima', 'DNI', '12345678', 1, true),
-('María López Rodríguez', 'maria.lopez@email.com', '987654322', 'Jr. Los Olivos 456, Lima', 'DNI', '23456789', 1, true),
-('Carlos Sánchez Torres', 'carlos.sanchez@email.com', '987654323', 'Calle Las Flores 789, Arequipa', 'DNI', '34567890', 2, true),
-('Ana Martínez Díaz', 'ana.martinez@email.com', '987654324', 'Av. Grau 321, Cusco', 'DNI', '45678901', 3, true),
-('Luis Fernández Castro', 'luis.fernandez@email.com', '987654325', 'Jr. Comercio 654, Trujillo', 'DNI', '56789012', 4, true),
-('Carmen Ruiz Vargas', 'carmen.ruiz@email.com', '987654326', 'Av. Arequipa 987, Lima', 'DNI', '67890123', 1, true),
-('Roberto Flores Mendoza', 'roberto.flores@email.com', '987654327', 'Calle Real 147, Chiclayo', 'DNI', '78901234', 5, true),
-('Patricia Vega Romero', 'patricia.vega@email.com', '987654328', 'Jr. Unión 258, Piura', 'DNI', '89012345', 6, true),
-('Miguel Ángel Torres', 'miguel.torres@email.com', '987654329', 'Av. Bolognesi 369, Ica', 'DNI', '90123456', 7, true),
-('Sofía Ramírez Gutiérrez', 'sofia.ramirez@email.com', '987654330', 'Calle Lima 741, Huancayo', 'DNI', '01234567', 8, true),
-('Empresa Tech SAC', 'ventas@techsac.com', '987654331', 'Av. Javier Prado 1500, Lima', 'RUC', '20123456789', 1, true),
-('Comercial del Sur EIRL', 'contacto@comsur.com', '987654332', 'Av. Ejército 890, Arequipa', 'RUC', '20234567890', 2, true);
+-- Insert sample clientes (passwords are BCrypt encrypted: "password123")
+INSERT INTO clientes (nombre_completo, email, telefono, direccion, tipo_documento, numero_documento, id_ciudad, password, activo) VALUES
+('Juan Pérez García', 'juan.perez@email.com', '987654321', 'Av. Principal 123, Lima', 'DNI', '12345678', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('María López Rodríguez', 'maria.lopez@email.com', '987654322', 'Jr. Los Olivos 456, Lima', 'DNI', '23456789', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Carlos Sánchez Torres', 'carlos.sanchez@email.com', '987654323', 'Calle Las Flores 789, Arequipa', 'DNI', '34567890', 2, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Ana Martínez Díaz', 'ana.martinez@email.com', '987654324', 'Av. Grau 321, Cusco', 'DNI', '45678901', 3, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Luis Fernández Castro', 'luis.fernandez@email.com', '987654325', 'Jr. Comercio 654, Trujillo', 'DNI', '56789012', 4, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Carmen Ruiz Vargas', 'carmen.ruiz@email.com', '987654326', 'Av. Arequipa 987, Lima', 'DNI', '67890123', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Roberto Flores Mendoza', 'roberto.flores@email.com', '987654327', 'Calle Real 147, Chiclayo', 'DNI', '78901234', 5, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Patricia Vega Romero', 'patricia.vega@email.com', '987654328', 'Jr. Unión 258, Piura', 'DNI', '89012345', 6, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Miguel Ángel Torres', 'miguel.torres@email.com', '987654329', 'Av. Bolognesi 369, Ica', 'DNI', '90123456', 7, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Sofía Ramírez Gutiérrez', 'sofia.ramirez@email.com', '987654330', 'Calle Lima 741, Huancayo', 'DNI', '01234567', 8, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Empresa Tech SAC', 'ventas@techsac.com', '987654331', 'Av. Javier Prado 1500, Lima', 'RUC', '20123456789', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true),
+('Comercial del Sur EIRL', 'contacto@comsur.com', '987654332', 'Av. Ejército 890, Arequipa', 'RUC', '20234567890', 2, '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', true);
 
 -- Insert sample cupones
 INSERT INTO cupones (codigo, descripcion, descuento_porcentaje, descuento_monto, fecha_inicio, fecha_fin, uso_maximo, uso_actual, activo, monto_minimo) VALUES

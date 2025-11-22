@@ -41,6 +41,9 @@ public class Cliente {
     @JoinColumn(name = "id_ciudad")
     private Ciudad ciudad;
 
+    @Column(name = "password", length = 255)
+    private String password; // Encrypted password for web login
+
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 

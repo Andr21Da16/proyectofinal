@@ -15,7 +15,7 @@ public class AuthResponse {
     private String token;
     private String refreshToken;
     private String tipo;
-    private ColaboradorResponse colaborador;
+    private Object usuario; // Can be ColaboradorResponse or ClienteResponse
     private List<PermisoResponse> permisos;
     private String tipoAcceso;
 }

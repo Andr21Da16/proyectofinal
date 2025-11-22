@@ -21,4 +21,12 @@ public interface ChatService {
     void addParticipant(Integer idRoom, Integer idColaborador);
 
     void removeParticipant(Integer idRoom, Integer idColaborador);
+
+    Integer getUnreadCount(Integer idRoom, Integer idColaborador);
+
+    void markAsRead(Integer idRoom, Integer idColaborador);
+
+    void pinMessage(Integer idMensaje);
+
+    void unpinMessage(Integer idMensaje);
 }

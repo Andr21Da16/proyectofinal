@@ -6,19 +6,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "rol_permiso")
+@Table(name = "rol_permiso", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "id_rol", "nombre_modulo" })
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RolPermiso {
 
-    @EmbeddedId
-    private RolPermisoId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_permiso")
+    private Integer idPermiso;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("idRol")
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
+
+    @Column(name = "nombre_modulo", nullable = false, length = 100)
+    private String nombreModulo;
 
     @Column(name = "puede_ver")
     private Boolean puedeVer = false;

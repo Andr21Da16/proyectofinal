@@ -66,6 +66,14 @@ public class JwtTokenProvider {
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 
+    public String generateTokenWithClaims(UserDetails userDetails, Map<String, Object> extraClaims) {
+        return createToken(extraClaims, userDetails.getUsername(), expiration);
+    }
+
+    public Claims extractAllClaimsPublic(String token) {
+        return extractAllClaims(token);
+    }
+
     private String createToken(Map<String, Object> claims, String subject, Long expirationTime) {
         return Jwts.builder()
                 .claims(claims)

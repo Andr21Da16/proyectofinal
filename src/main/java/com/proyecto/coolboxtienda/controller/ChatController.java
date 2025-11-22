@@ -43,4 +43,27 @@ public class ChatController {
         chatService.addParticipant(id, idColaborador);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/rooms/{id}/unread-count")
+    public ResponseEntity<Integer> getUnreadCount(@PathVariable Integer id, @RequestParam Integer idColaborador) {
+        return ResponseEntity.ok(chatService.getUnreadCount(id, idColaborador));
+    }
+
+    @PutMapping("/rooms/{id}/mark-read")
+    public ResponseEntity<Void> markAsRead(@PathVariable Integer id, @RequestParam Integer idColaborador) {
+        chatService.markAsRead(id, idColaborador);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/messages/{id}/pin")
+    public ResponseEntity<Void> pinMessage(@PathVariable Integer id) {
+        chatService.pinMessage(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/messages/{id}/unpin")
+    public ResponseEntity<Void> unpinMessage(@PathVariable Integer id) {
+        chatService.unpinMessage(id);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -76,4 +76,9 @@ public class ProductoController {
     public ResponseEntity<List<ProductoResponse>> getProductosByMarca(@PathVariable String marca) {
         return ResponseEntity.ok(productoService.getProductosByMarca(marca));
     }
+
+    @GetMapping("/all-branches")
+    public ResponseEntity<List<ProductoResponse>> getAllProductosAllBranches() {
+        return ResponseEntity.ok(productoService.getAllProductosAllBranches());
+    }
 }

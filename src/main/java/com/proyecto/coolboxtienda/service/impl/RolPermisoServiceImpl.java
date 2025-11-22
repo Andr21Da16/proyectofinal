@@ -4,7 +4,6 @@ import com.proyecto.coolboxtienda.dto.request.RolPermisoRequest;
 import com.proyecto.coolboxtienda.dto.response.PermisoResponse;
 import com.proyecto.coolboxtienda.entity.Rol;
 import com.proyecto.coolboxtienda.entity.RolPermiso;
-import com.proyecto.coolboxtienda.entity.RolPermisoId;
 import com.proyecto.coolboxtienda.repository.RolPermisoRepository;
 import com.proyecto.coolboxtienda.repository.RolRepository;
 import com.proyecto.coolboxtienda.service.RolPermisoService;
@@ -24,7 +23,7 @@ public class RolPermisoServiceImpl implements RolPermisoService {
 
     @Override
     public List<PermisoResponse> getPermisosByRol(Integer idRol) {
-        List<RolPermiso> permisos = rolPermisoRepository.findAllByIdRol(idRol);
+        List<RolPermiso> permisos = rolPermisoRepository.findAllByRol_IdRol(idRol);
         return permisos.stream()
                 .map(this::toPermisoResponse)
                 .collect(Collectors.toList());
@@ -37,14 +36,13 @@ public class RolPermisoServiceImpl implements RolPermisoService {
         Rol rol = rolRepository.findById(request.getIdRol())
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
-        // Crear o actualizar permiso
-        RolPermisoId id = new RolPermisoId(request.getIdRol(), request.getNombreModulo());
-
-        RolPermiso rolPermiso = rolPermisoRepository.findById(id)
+        // Buscar permiso existente
+        RolPermiso rolPermiso = rolPermisoRepository
+                .findByRol_IdRolAndNombreModulo(request.getIdRol(), request.getNombreModulo())
                 .orElse(new RolPermiso());
 
-        rolPermiso.setId(id);
         rolPermiso.setRol(rol);
+        rolPermiso.setNombreModulo(request.getNombreModulo());
         rolPermiso.setPuedeVer(request.getPuedeVer());
         rolPermiso.setPuedeEditar(request.getPuedeEditar());
         rolPermiso.setPuedeCrear(request.getPuedeCrear());
@@ -57,21 +55,23 @@ public class RolPermisoServiceImpl implements RolPermisoService {
     @Override
     @Transactional
     public void deletePermiso(Integer idRol, String nombreModulo) {
-        RolPermisoId id = new RolPermisoId(idRol, nombreModulo);
-        rolPermisoRepository.deleteById(id);
+        RolPermiso rolPermiso = rolPermisoRepository
+                .findByRol_IdRolAndNombreModulo(idRol, nombreModulo)
+                .orElseThrow(() -> new RuntimeException("Permiso no encontrado"));
+        rolPermisoRepository.delete(rolPermiso);
     }
 
     @Override
     public PermisoResponse getPermiso(Integer idRol, String nombreModulo) {
-        RolPermisoId id = new RolPermisoId(idRol, nombreModulo);
-        RolPermiso rolPermiso = rolPermisoRepository.findById(id)
+        RolPermiso rolPermiso = rolPermisoRepository
+                .findByRol_IdRolAndNombreModulo(idRol, nombreModulo)
                 .orElseThrow(() -> new RuntimeException("Permiso no encontrado"));
         return toPermisoResponse(rolPermiso);
     }
 
     private PermisoResponse toPermisoResponse(RolPermiso rolPermiso) {
         return PermisoResponse.builder()
-                .nombreModulo(rolPermiso.getId().getNombreModulo())
+                .nombreModulo(rolPermiso.getNombreModulo())
                 .puedeVer(rolPermiso.getPuedeVer())
                 .puedeEditar(rolPermiso.getPuedeEditar())
                 .puedeCrear(rolPermiso.getPuedeCrear())

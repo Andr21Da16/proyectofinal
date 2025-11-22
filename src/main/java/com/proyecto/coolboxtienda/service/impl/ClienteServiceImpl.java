@@ -6,17 +6,14 @@ import com.proyecto.coolboxtienda.dto.response.ClienteResponse;
 import com.proyecto.coolboxtienda.dto.response.VentaResponse;
 import com.proyecto.coolboxtienda.entity.Ciudad;
 import com.proyecto.coolboxtienda.entity.Cliente;
-import com.proyecto.coolboxtienda.entity.Venta;
 import com.proyecto.coolboxtienda.repository.CiudadRepository;
 import com.proyecto.coolboxtienda.repository.ClienteRepository;
-import com.proyecto.coolboxtienda.repository.VentaRepository;
 import com.proyecto.coolboxtienda.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +23,6 @@ public class ClienteServiceImpl implements ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final CiudadRepository ciudadRepository;
-    private final VentaRepository ventaRepository;
 
     @Override
     public List<ClienteResponse> getAllClientes() {
