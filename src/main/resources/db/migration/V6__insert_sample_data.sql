@@ -10,7 +10,7 @@ INSERT INTO roles (nombre_rol, descripcion_rol, tipo_acceso, activo) VALUES
 ('Gerente', 'Gerente con acceso completo a todos los módulos ERP', 'ERP', true);
 
 -- Insert Manager collaborator (password: "gerente123" - BCrypt encrypted)
-INSERT INTO colaboradores (nombre_colaborador, email_colaborador, usuario_colaborador, contraseña_colaborador, id_rol, id_sucursal) VALUES
+INSERT INTO colaborador (nombre_colaborador, email_colaborador, usuario_colaborador, contraseña_colaborador, id_rol, id_sucursal) VALUES
 ('Gerente General', 'gerente@coolbox.com', 'gerente', '$2a$10$dXJ3SW6G7P3EyFCLTwMemuIUVlb67B3OjSO.WNxR3VgOSdyBXm.5e', 3, 1);
 
 -- Insert sample rol_permiso data
