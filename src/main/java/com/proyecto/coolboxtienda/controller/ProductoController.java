@@ -78,7 +78,13 @@ public class ProductoController {
     }
 
     @GetMapping("/all-branches")
-    public ResponseEntity<List<ProductoResponse>> getAllProductosAllBranches() {
+    public ResponseEntity<List<com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse>> getAllProductosAllBranches() {
         return ResponseEntity.ok(productoService.getAllProductosAllBranches());
+    }
+
+    @GetMapping("/sucursal/{idSucursal}")
+    public ResponseEntity<List<com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse>> getProductosBySucursal(
+            @PathVariable Integer idSucursal) {
+        return ResponseEntity.ok(productoService.getProductosBySucursal(idSucursal));
     }
 }

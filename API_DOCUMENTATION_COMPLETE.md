@@ -35,10 +35,9 @@ http://localhost:8080/api
 **Endpoint:** `POST /auth/login`
 
 **Request Body:**
-```json
 {
-  "usuario": "admin",
-  "contraseña": "admin123"
+  "usuarioColaborador": "admin",
+  "contraseniaColaborador": "admin123"
 }
 ```
 
@@ -1493,7 +1492,7 @@ Ejemplo: `GET /productos?page=0&size=10&sort=nombreProducto,asc`
 ### Datos de Prueba
 - **Usuario Admin:** `admin` / `admin123`
 - **Usuario Vendedor:** `vendedor` / `vendedor123`
-- **Usuario Gerente:** `gerente` / `gerente123`
+- **Usuario Gerente:** `gerente` / `1234`
 - **Cliente:** `juan.perez@email.com` / `password123`
 - **Cupón de prueba:** `BIENVENIDA10` (10% de descuento)
 

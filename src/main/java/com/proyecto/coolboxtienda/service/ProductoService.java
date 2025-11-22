@@ -28,5 +28,7 @@ public interface ProductoService {
 
     List<String> getAllMarcas();
 
-    List<ProductoResponse> getAllProductosAllBranches();
+    List<com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse> getAllProductosAllBranches();
+
+    List<com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse> getProductosBySucursal(Integer idSucursal);
 }

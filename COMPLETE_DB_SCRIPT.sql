@@ -548,7 +548,7 @@ INSERT INTO sucursales (nombre_sucursal, direccion_sucursal, telefono_sucursal, 
 -- Gerente: gerente / gerente123 ($2a$10$dXJ3SW6G7P3EyFCLTwMemuIUVlb67B3OjSO.WNxR3VgOSdyBXm.5e)
 -- Otros: password123 ($2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J)
 INSERT INTO colaborador (nombre_colaborador, email_colaborador, usuario_colaborador, contraseña_colaborador, id_rol, id_sucursal) VALUES
-('Gerente General', 'gerente@coolbox.com', 'gerente', '$2a$10$dXJ3SW6G7P3EyFCLTwMemuIUVlb67B3OjSO.WNxR3VgOSdyBXm.5e', 2, 1),
+('Gerente General', 'gerente@coolbox.com', 'gerente', '$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlNBxBFveBqi6.', 2, 1),
 ('Admin Sistema', 'admin@coolbox.com', 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', 1, 1),
 ('Juan Vendedor', 'juan.vendedor@coolbox.com', 'jvendedor', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', 3, 1),
 ('Maria Vendedora', 'maria.vendedora@coolbox.com', 'mvendedora', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J5Gj8J8J8J8J8J8J8J8J8J8J8J8J8J', 3, 2),

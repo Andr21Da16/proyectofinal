@@ -147,12 +147,38 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductoResponse> getAllProductosAllBranches() {
-        // Obtener todos los productos de todas las sucursales sin excepción
+    public List<com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse> getAllProductosAllBranches() {
         List<SucursalProducto> allInventory = sucursalProductoRepository.findAll();
         return allInventory.stream()
-                .map(sp -> entityMapper.toProductoResponse(sp.getProducto()))
-                .distinct()
+                .map(this::mapToProductoSucursalResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse> getProductosBySucursal(
+            Integer idSucursal) {
+        List<SucursalProducto> inventory = sucursalProductoRepository.findBySucursal_IdSucursal(idSucursal);
+        return inventory.stream()
+                .map(this::mapToProductoSucursalResponse)
+                .collect(Collectors.toList());
+    }
+
+    private com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse mapToProductoSucursalResponse(
+            SucursalProducto sp) {
+        Producto p = sp.getProducto();
+        return com.proyecto.coolboxtienda.dto.response.ProductoSucursalResponse.builder()
+                .idProducto(p.getIdProducto())
+                .nombreProducto(p.getNombreProducto())
+                .marcaProducto(p.getMarcaProducto())
+                .modeloProducto(p.getModeloProducto())
+                .urlImagenProducto(p.getUrlImagenProducto())
+                .categoriaNombre(p.getCategoria().getNombreCategoria())
+                .activo(p.getActivo())
+                .idSucursal(sp.getSucursal().getIdSucursal())
+                .nombreSucursal(sp.getSucursal().getNombreSucursal())
+                .precio(sp.getPrecioProducto())
+                .stock(sp.getStockProducto())
+                .build();
     }
 }
