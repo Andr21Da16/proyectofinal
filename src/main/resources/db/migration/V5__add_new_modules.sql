@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     password VARCHAR(255),
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT true,
-    FOREIGN KEY (id_ciudad) REFERENCES ciudad(id_ciudad)
+    FOREIGN KEY (id_ciudad) REFERENCES ciudades(id_ciudad)
 );
 
 -- Cupones
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
     observaciones TEXT,
     id_venta_generada INTEGER,
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
-    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal),
+    FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_cupon) REFERENCES cupones(id_cupon)
 );
 
@@ -88,9 +88,9 @@ CREATE TABLE IF NOT EXISTS compras_proveedor (
     id_colaborador INTEGER,
     id_sucursal INTEGER,
     observaciones TEXT,
-    FOREIGN KEY (id_proveedor) REFERENCES proveedor(id_proveedor),
+    FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor),
     FOREIGN KEY (id_colaborador) REFERENCES colaborador(id_colaborador),
-    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal)
+    FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal)
 );
 
 CREATE TABLE IF NOT EXISTS compra_proveedor_items (
