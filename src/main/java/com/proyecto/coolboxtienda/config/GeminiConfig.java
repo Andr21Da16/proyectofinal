@@ -13,4 +13,5 @@ public class GeminiConfig {
     private String model;
     private Double temperature;
     private Integer maxTokens;
+    // Trigger recompilation
 }
