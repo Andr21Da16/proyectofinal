@@ -3,6 +3,7 @@ package com.proyecto.coolboxtienda.security;
 import com.proyecto.coolboxtienda.entity.Colaborador;
 import com.proyecto.coolboxtienda.repository.ColaboradorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -16,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Service
+@Primary
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
