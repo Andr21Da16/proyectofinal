@@ -231,6 +231,20 @@ public class EntityMapper {
                 .build();
     }
 
+    public ProductoProveedorResponse toProductoProveedorResponse(ProductoProveedor pp) {
+        return ProductoProveedorResponse.builder()
+                .idProducto(pp.getProducto().getIdProducto())
+                .nombreProducto(pp.getProducto().getNombreProducto())
+                .marca(pp.getProducto().getMarcaProducto())
+                .modelo(pp.getProducto().getModeloProducto())
+                .nombreCategoria(pp.getProducto().getCategoria().getNombreCategoria())
+                .idProveedor(pp.getProveedor().getIdProveedor())
+                .nombreProveedor(pp.getProveedor().getNombreProveedor())
+                .precioProducto(pp.getPrecioProducto())
+                .stockProducto(pp.getStockProducto())
+                .build();
+    }
+
     // ==================== SUCURSAL MAPPERS ====================
 
     public Sucursal toSucursalEntity(SucursalRequest request, Ciudad ciudad) {

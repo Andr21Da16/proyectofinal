@@ -1,6 +1,7 @@
 package com.proyecto.coolboxtienda.service.impl;
 
 import com.proyecto.coolboxtienda.dto.request.ProveedorRequest;
+import com.proyecto.coolboxtienda.dto.response.ProductoProveedorResponse;
 import com.proyecto.coolboxtienda.dto.response.ProveedorResponse;
 import com.proyecto.coolboxtienda.entity.Ciudad;
 import com.proyecto.coolboxtienda.entity.Producto;
@@ -109,5 +110,44 @@ public class ProveedorServiceImpl implements ProveedorService {
                 productoProveedor.setStockProducto(stockInicial);
 
                 productoProveedorRepository.save(productoProveedor);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<ProductoProveedorResponse> getProductosByProveedor(Integer idProveedor) {
+                List<ProductoProveedor> productoProveedores = productoProveedorRepository
+                                .findByProveedor_IdProveedor(idProveedor);
+                return productoProveedores.stream()
+                                .map(entityMapper::toProductoProveedorResponse)
+                                .collect(Collectors.toList());
+        }
+
+        @Override
+        @Transactional
+        public void updateProductoProveedor(Integer idProducto, Integer idProveedor, BigDecimal nuevoPrecio,
+                        Integer nuevoStock) {
+                ProductoProveedor productoProveedor = productoProveedorRepository
+                                .findByProducto_IdProductoAndProveedor_IdProveedor(idProducto, idProveedor)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No se encontró la relación producto-proveedor"));
+
+                if (nuevoPrecio != null) {
+                        productoProveedor.setPrecioProducto(nuevoPrecio);
+                }
+                if (nuevoStock != null) {
+                        productoProveedor.setStockProducto(nuevoStock);
+                }
+
+                productoProveedorRepository.save(productoProveedor);
+        }
+
+        @Override
+        @Transactional
+        public void removeProductoFromProveedor(Integer idProducto, Integer idProveedor) {
+                ProductoProveedorId id = new ProductoProveedorId(idProducto, idProveedor);
+                if (!productoProveedorRepository.existsById(id)) {
+                        throw new RuntimeException("No se encontró la relación producto-proveedor");
+                }
+                productoProveedorRepository.deleteById(id);
         }
 }

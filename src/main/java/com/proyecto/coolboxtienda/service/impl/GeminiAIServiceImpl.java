@@ -2,22 +2,23 @@ package com.proyecto.coolboxtienda.service.impl;
 
 import com.proyecto.coolboxtienda.dto.request.AIQueryRequest;
 import com.proyecto.coolboxtienda.dto.response.AIResponse;
+import com.proyecto.coolboxtienda.entity.Colaborador;
 import com.proyecto.coolboxtienda.entity.Producto;
+import com.proyecto.coolboxtienda.entity.RolPermiso;
 import com.proyecto.coolboxtienda.entity.Venta;
 import com.proyecto.coolboxtienda.entity.SucursalProducto;
+import com.proyecto.coolboxtienda.repository.ColaboradorRepository;
 import com.proyecto.coolboxtienda.repository.ProductoRepository;
+import com.proyecto.coolboxtienda.repository.RolPermisoRepository;
 import com.proyecto.coolboxtienda.repository.VentaRepository;
 import com.proyecto.coolboxtienda.repository.SucursalProductoRepository;
-import com.proyecto.coolboxtienda.repository.ColaboradorRepository;
 import com.proyecto.coolboxtienda.service.GeminiAIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,12 +31,34 @@ public class GeminiAIServiceImpl implements GeminiAIService {
     private final VentaRepository ventaRepository;
     private final SucursalProductoRepository sucursalProductoRepository;
     private final ColaboradorRepository colaboradorRepository;
+    private final RolPermisoRepository rolPermisoRepository;
+
+    // Tipos de consulta y módulos requeridos
+    private static final String MODULO_PRODUCTOS = "PRODUCTOS";
+    private static final String MODULO_VENTAS = "VENTAS";
+    private static final String MODULO_REPORTES = "REPORTES";
 
     @Override
     public AIResponse query(AIQueryRequest request) {
         try {
-            // Obtener datos relevantes del ERP según el contexto de la consulta
-            String erpContext = buildERPContext(request.getQuery());
+            // Validar permisos del colaborador
+            Colaborador colaborador = colaboradorRepository.findById(request.getIdColaborador())
+                    .orElseThrow(() -> new RuntimeException("Colaborador no encontrado"));
+
+            // Detectar tipo de consulta
+            String queryType = detectQueryType(request.getQuery());
+
+            // Verificar permisos
+            if (!hasPermissionForQuery(colaborador.getRol().getIdRol(), queryType)) {
+                return AIResponse.builder()
+                        .contexto(request.getQuery())
+                        .respuesta(buildPermissionDeniedMessage(queryType))
+                        .exito(false)
+                        .build();
+            }
+
+            // Construir contexto basado en permisos
+            String erpContext = buildContextByPermissions(colaborador, request.getQuery(), queryType);
 
             // Construir el prompt con contexto del ERP
             String enhancedQuery = buildEnhancedQuery(request.getQuery(), erpContext);
@@ -80,21 +103,30 @@ public class GeminiAIServiceImpl implements GeminiAIService {
             var colaborador = colaboradorRepository.findById(idColaborador)
                     .orElseThrow(() -> new RuntimeException("Colaborador no encontrado"));
 
-            // Obtener ventas recientes del colaborador
-            LocalDateTime hace30Dias = LocalDateTime.now().minusDays(30);
-            List<Venta> ventasRecientes = ventaRepository.findByColaborador_IdColaboradorAndFechaVentaAfter(
-                    idColaborador, hace30Dias);
+            // Verificar permiso de productos
+            if (!hasPermissionForModule(colaborador.getRol().getIdRol(), MODULO_PRODUCTOS)) {
+                return AIResponse.builder()
+                        .contexto("Recomendaciones de productos")
+                        .respuesta("No tienes permisos para consultar información de productos.")
+                        .exito(false)
+                        .build();
+            }
 
-            // Obtener productos más vendidos
-            List<Producto> productosActivos = productoRepository.findByActivoTrue();
-
-            // Construir contexto
+            // Obtener ventas recientes del colaborador (si tiene permiso)
             StringBuilder context = new StringBuilder();
             context.append("DATOS DEL SISTEMA ERP - COOLBOX:\n\n");
             context.append("Colaborador: ").append(colaborador.getNombreColaborador()).append("\n");
             context.append("Sucursal: ").append(colaborador.getSucursal().getNombreSucursal()).append("\n");
-            context.append("Ventas últimos 30 días: ").append(ventasRecientes.size()).append("\n\n");
 
+            if (hasPermissionForModule(colaborador.getRol().getIdRol(), MODULO_VENTAS)) {
+                LocalDateTime hace30Dias = LocalDateTime.now().minusDays(30);
+                List<Venta> ventasRecientes = ventaRepository.findByColaborador_IdColaboradorAndFechaVentaAfter(
+                        idColaborador, hace30Dias);
+                context.append("Ventas últimos 30 días: ").append(ventasRecientes.size()).append("\n\n");
+            }
+
+            // Obtener productos más vendidos
+            List<Producto> productosActivos = productoRepository.findByActivoTrue();
             context.append("PRODUCTOS DISPONIBLES:\n");
             productosActivos.stream().limit(20).forEach(p -> context.append("- ").append(p.getNombreProducto())
                     .append(" (").append(p.getMarcaProducto()).append(")\n"));
@@ -105,6 +137,7 @@ public class GeminiAIServiceImpl implements GeminiAIService {
                     "Responde de forma concisa y profesional.";
 
             AIQueryRequest request = new AIQueryRequest();
+            request.setIdColaborador(idColaborador);
             request.setQuery(query);
             return query(request);
         } catch (Exception e) {
@@ -119,6 +152,10 @@ public class GeminiAIServiceImpl implements GeminiAIService {
     @Override
     public AIResponse analyzeSalesData(Integer idSucursal) {
         try {
+            // Para análisis de ventas, necesitamos validar que el usuario tenga permisos
+            // Este método debería recibir idColaborador también, pero por compatibilidad
+            // asumimos que solo administradores pueden acceder a este endpoint
+
             // Obtener ventas de la sucursal
             LocalDateTime hace30Dias = LocalDateTime.now().minusDays(30);
             List<Venta> ventas = ventaRepository.findBySucursal_IdSucursalAndFechaVentaAfter(
@@ -159,6 +196,7 @@ public class GeminiAIServiceImpl implements GeminiAIService {
                     "\nResponde de forma concisa y profesional.";
 
             AIQueryRequest request = new AIQueryRequest();
+            request.setIdColaborador(1); // Temporal: asumimos admin
             request.setQuery(query);
             return query(request);
         } catch (Exception e) {
@@ -170,23 +208,91 @@ public class GeminiAIServiceImpl implements GeminiAIService {
         }
     }
 
-    private String buildERPContext(String query) {
+    /**
+     * Detecta el tipo de consulta basándose en palabras clave
+     */
+    private String detectQueryType(String query) {
+        String queryLower = query.toLowerCase();
+
+        // Palabras clave para ventas y reportes (requieren permisos especiales)
+        if (queryLower.contains("venta") || queryLower.contains("vender") ||
+                queryLower.contains("vendido") || queryLower.contains("vendimos") ||
+                queryLower.contains("ingreso") || queryLower.contains("ganancia")) {
+            return MODULO_VENTAS;
+        }
+
+        if (queryLower.contains("reporte") || queryLower.contains("análisis") ||
+                queryLower.contains("estadística") || queryLower.contains("métrica") ||
+                queryLower.contains("rendimiento financiero") || queryLower.contains("balance")) {
+            return MODULO_REPORTES;
+        }
+
+        // Por defecto, consultas sobre productos (acceso más amplio)
+        return MODULO_PRODUCTOS;
+    }
+
+    /**
+     * Verifica si el rol tiene permiso para el tipo de consulta
+     */
+    private boolean hasPermissionForQuery(Integer idRol, String queryType) {
+        return hasPermissionForModule(idRol, queryType);
+    }
+
+    /**
+     * Verifica si el rol tiene permiso para ver un módulo específico
+     */
+    private boolean hasPermissionForModule(Integer idRol, String nombreModulo) {
+        Optional<RolPermiso> permiso = rolPermisoRepository.findByRol_IdRolAndNombreModulo(idRol, nombreModulo);
+        return permiso.isPresent() && permiso.get().getPuedeVer();
+    }
+
+    /**
+     * Construye mensaje de permiso denegado
+     */
+    private String buildPermissionDeniedMessage(String queryType) {
+        switch (queryType) {
+            case MODULO_VENTAS:
+                return "Lo siento, no tienes permisos para consultar información de ventas. " +
+                        "Esta función está disponible solo para administradores y gerentes. " +
+                        "Puedes preguntarme sobre productos, inventario o recomendaciones.";
+            case MODULO_REPORTES:
+                return "Lo siento, no tienes permisos para consultar reportes y análisis financieros. " +
+                        "Esta función está disponible solo para administradores y gerentes. " +
+                        "Puedes preguntarme sobre productos, inventario o recomendaciones.";
+            default:
+                return "Lo siento, no tienes permisos para realizar esta consulta.";
+        }
+    }
+
+    /**
+     * Construye contexto basado en los permisos del colaborador
+     */
+    private String buildContextByPermissions(Colaborador colaborador, String query, String queryType) {
         StringBuilder context = new StringBuilder();
         context.append("DATOS DEL SISTEMA ERP - COOLBOX:\n\n");
 
-        // Si la consulta menciona productos
-        if (query.toLowerCase().contains("producto") || query.toLowerCase().contains("inventario")) {
+        // Siempre incluir información del colaborador
+        context.append("Usuario: ").append(colaborador.getNombreColaborador()).append("\n");
+        context.append("Rol: ").append(colaborador.getRol().getNombreRol()).append("\n");
+        context.append("Sucursal: ").append(colaborador.getSucursal().getNombreSucursal()).append("\n\n");
+
+        // Incluir datos según permisos
+        if (queryType.equals(MODULO_PRODUCTOS) || query.toLowerCase().contains("producto") ||
+                query.toLowerCase().contains("inventario") || query.toLowerCase().contains("recomendar")) {
             List<Producto> productos = productoRepository.findByActivoTrue();
             context.append("PRODUCTOS ACTIVOS: ").append(productos.size()).append("\n");
-            productos.stream().limit(10).forEach(p -> context.append("- ").append(p.getNombreProducto())
+            productos.stream().limit(15).forEach(p -> context.append("- ").append(p.getNombreProducto())
                     .append(" (").append(p.getMarcaProducto()).append(")\n"));
         }
 
-        // Si la consulta menciona ventas
-        if (query.toLowerCase().contains("venta") || query.toLowerCase().contains("vender")) {
+        if (queryType.equals(MODULO_VENTAS) && hasPermissionForModule(colaborador.getRol().getIdRol(), MODULO_VENTAS)) {
             LocalDateTime hace7Dias = LocalDateTime.now().minusDays(7);
             List<Venta> ventasRecientes = ventaRepository.findByFechaVentaAfter(hace7Dias);
+            double totalVentas = ventasRecientes.stream()
+                    .mapToDouble(v -> v.getTotal().doubleValue())
+                    .sum();
             context.append("\nVENTAS ÚLTIMOS 7 DÍAS: ").append(ventasRecientes.size()).append("\n");
+            context.append("Monto total: S/ ").append(String.format("%.2f", totalVentas)).append("\n");
         }
 
         return context.toString();

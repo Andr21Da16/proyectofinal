@@ -31,13 +31,19 @@ http://localhost:8080/api
 
 ## 🔐 Autenticación
 
+> [!NOTE]
+> **Credenciales de Acceso de Ejemplo:**
+> - Usuario: `admin`
+> - Contraseña: `1234`
+
 ### 1. Login de Colaborador (ERP)
 **Endpoint:** `POST /auth/login`
 
 **Request Body:**
+```json
 {
   "usuarioColaborador": "admin",
-  "contraseniaColaborador": "admin123"
+  "contraseniaColaborador": "1234"
 }
 ```
 
@@ -939,17 +945,37 @@ http://localhost:8080/api
   {
     "idProveedor": 1,
     "nombreProveedor": "Importadora Tech SAC",
-    "ruc": "20123456789",
-    "direccion": "Av. Industrial 1000, Lima",
-    "telefono": "014567890",
-    "email": "ventas@importadoratech.com",
-    "contacto": "Carlos Mendoza",
+    "rucProveedor": "20123456789",
+    "direccionProveedor": "Av. Industrial 1000, Lima",
+    "telefonoProveedor": "014567890",
+    "emailProveedor": "ventas@importadoratech.com",
+    "nombreCiudad": "Lima",
+    "nombreDepartamento": "Lima",
     "activo": true
   }
 ]
 ```
 
-### 2. Crear Proveedor
+### 2. Obtener Proveedor por ID
+**Endpoint:** `GET /proveedores/{id}`
+**Headers:** `Authorization: Bearer {token}`
+
+**Response:**
+```json
+{
+  "idProveedor": 1,
+  "nombreProveedor": "Importadora Tech SAC",
+  "rucProveedor": "20123456789",
+  "direccionProveedor": "Av. Industrial 1000, Lima",
+  "telefonoProveedor": "014567890",
+  "emailProveedor": "ventas@importadoratech.com",
+  "nombreCiudad": "Lima",
+  "nombreDepartamento": "Lima",
+  "activo": true
+}
+```
+
+### 3. Crear Proveedor
 **Endpoint:** `POST /proveedores`
 **Headers:** `Authorization: Bearer {token}`
 
@@ -957,22 +983,134 @@ http://localhost:8080/api
 ```json
 {
   "nombreProveedor": "Distribuidora Global EIRL",
-  "ruc": "20987654321",
-  "direccion": "Jr. Comercio 500, Lima",
-  "telefono": "019876543",
-  "email": "contacto@disglobal.com",
-  "contacto": "María Rodríguez",
-  "activo": true
+  "emailProveedor": "contacto@disglobal.com",
+  "telefonoProveedor": "019876543",
+  "idCiudad": 1
 }
 ```
 
-### 3. Actualizar Proveedor
-**Endpoint:** `PUT /proveedores/1`
+### 4. Actualizar Proveedor
+**Endpoint:** `PUT /proveedores/{id}`
 **Headers:** `Authorization: Bearer {token}`
 
-### 4. Eliminar Proveedor (Soft Delete)
-**Endpoint:** `DELETE /proveedores/1`
+**Request Body:**
+```json
+{
+  "nombreProveedor": "Distribuidora Global SAC",
+  "emailProveedor": "ventas@disglobal.com",
+  "telefonoProveedor": "019876543",
+  "idCiudad": 1
+}
+```
+
+### 5. Eliminar Proveedor
+**Endpoint:** `DELETE /proveedores/{id}`
 **Headers:** `Authorization: Bearer {token}`
+
+### 6. Asignar Producto a Proveedor
+**Endpoint:** `POST /proveedores/asignar-producto`
+**Headers:** `Authorization: Bearer {token}`
+
+**Query Parameters:**
+- `idProducto` (Integer, requerido): ID del producto
+- `idProveedor` (Integer, requerido): ID del proveedor
+- `precioCompra` (BigDecimal, requerido): Precio de compra del producto
+- `stockInicial` (Integer, requerido): Stock inicial del producto
+
+**Ejemplo:**
+```
+POST /proveedores/asignar-producto?idProducto=1&idProveedor=1&precioCompra=2500.00&stockInicial=50
+```
+
+### 7. Listar Productos de un Proveedor
+**Endpoint:** `GET /proveedores/{id}/productos`
+**Headers:** `Authorization: Bearer {token}`
+
+**Response:**
+```json
+[
+  {
+    "idProducto": 1,
+    "nombreProducto": "Laptop HP Pavilion 15",
+    "marca": "HP",
+    "modelo": "Pavilion 15-eh1xxx",
+    "nombreCategoria": "Laptops",
+    "idProveedor": 1,
+    "nombreProveedor": "Importadora Tech SAC",
+    "precioProducto": 2500.00,
+    "stockProducto": 50
+  },
+  {
+    "idProducto": 5,
+    "nombreProducto": "Teclado Mecánico RGB",
+    "marca": "Logitech",
+    "modelo": "G Pro X",
+    "nombreCategoria": "Accesorios",
+    "idProveedor": 1,
+    "nombreProveedor": "Importadora Tech SAC",
+    "precioProducto": 150.00,
+    "stockProducto": 100
+  }
+]
+```
+
+### 8. Actualizar Precio y Stock de Producto en Proveedor
+**Endpoint:** `PUT /proveedores/actualizar-producto`
+**Headers:** `Authorization: Bearer {token}`
+
+**Query Parameters:**
+- `idProducto` (Integer, requerido): ID del producto
+- `idProveedor` (Integer, requerido): ID del proveedor
+- `nuevoPrecio` (BigDecimal, opcional): Nuevo precio del producto
+- `nuevoStock` (Integer, opcional): Nuevo stock del producto
+
+**Ejemplo:**
+```
+PUT /proveedores/actualizar-producto?idProducto=1&idProveedor=1&nuevoPrecio=2400.00&nuevoStock=75
+```
+
+### 9. Remover Producto de Proveedor
+**Endpoint:** `DELETE /proveedores/remover-producto`
+**Headers:** `Authorization: Bearer {token}`
+
+**Query Parameters:**
+- `idProducto` (Integer, requerido): ID del producto
+- `idProveedor` (Integer, requerido): ID del proveedor
+
+**Ejemplo:**
+```
+DELETE /proveedores/remover-producto?idProducto=1&idProveedor=1
+```
+
+### 10. Obtener Proveedores de un Producto
+**Endpoint:** `GET /proveedores/producto/{idProducto}`
+**Headers:** `Authorization: Bearer {token}`
+
+**Response:**
+```json
+[
+  {
+    "idProveedor": 1,
+    "nombreProveedor": "Importadora Tech SAC",
+    "rucProveedor": "20123456789",
+    "telefonoProveedor": "014567890",
+    "emailProveedor": "ventas@importadoratech.com",
+    "nombreCiudad": "Lima",
+    "nombreDepartamento": "Lima",
+    "activo": true
+  },
+  {
+    "idProveedor": 2,
+    "nombreProveedor": "Distribuidora Global SAC",
+    "rucProveedor": "20987654321",
+    "telefonoProveedor": "019876543",
+    "emailProveedor": "ventas@disglobal.com",
+    "nombreCiudad": "Lima",
+    "nombreDepartamento": "Lima",
+    "activo": true
+  }
+]
+```
 
 ---
 
@@ -1423,41 +1561,73 @@ http://localhost:8080/api
 
 ## 🤖 Asistente AI
 
+> [!IMPORTANT]
+> **Sistema de Permisos Basado en Roles:**
+> El asistente de IA filtra automáticamente las consultas según los permisos del colaborador. No es necesario especificar el contexto manualmente.
+
+### Permisos por Rol
+
+| Tipo de Consulta | Vendedor | Gerente | Administrador |
+|-----------------|----------|---------|---------------|
+| Productos e Inventario | ✅ | ✅ | ✅ |
+| Recomendaciones | ✅ | ✅ | ✅ |
+| Ventas y Transacciones | ❌ | ✅ | ✅ |
+| Reportes y Análisis | ❌ | ✅ | ✅ |
+
 ### 1. Consultar al Asistente
-**Endpoint:** `POST /ai/consulta`
+**Endpoint:** `POST /ai/query`
 **Headers:** `Authorization: Bearer {token}`
 
 **Request Body:**
 ```json
 {
-  "pregunta": "¿Cuáles son los productos más vendidos este mes?"
+  "idColaborador": 1,
+  "query": "¿Qué laptop recomiendas para un estudiante de ingeniería?"
+}
+```
+
+**Response (Vendedor - Permitido):**
+```json
+{
+  "contexto": "¿Qué laptop recomiendas para un estudiante de ingeniería?",
+  "respuesta": "Basándome en el inventario actual, te recomiendo la Laptop HP Pavilion 15 con procesador Intel Core i5, 8GB RAM y 256GB SSD. Ideal para programación y aplicaciones de ingeniería básicas.",
+  "exito": true
+}
+```
+
+**Request Body (Vendedor consultando ventas - Denegado):**
+```json
+{
+  "idColaborador": 2,
+  "query": "¿Cuánto vendimos el mes pasado?"
 }
 ```
 
 **Response:**
 ```json
 {
-  "respuesta": "Los productos más vendidos este mes son:\n1. Laptop HP Pavilion 15 - 25 unidades\n2. Monitor LG 24' - 18 unidades\n3. Teclado Mecánico RGB - 15 unidades",
-  "datos": [
-    {
-      "producto": "Laptop HP Pavilion 15",
-      "cantidad": 25
-    }
-  ]
+  "contexto": "¿Cuánto vendimos el mes pasado?",
+  "respuesta": "Lo siento, no tienes permisos para consultar información de ventas. Esta función está disponible solo para administradores y gerentes. Puedes preguntarme sobre productos, inventario o recomendaciones.",
+  "exito": false
 }
 ```
 
 ### 2. Obtener Recomendaciones de Productos
-**Endpoint:** `POST /ai/recomendaciones`
+**Endpoint:** `GET /ai/recommendations/{idColaborador}`
 **Headers:** `Authorization: Bearer {token}`
 
-**Request Body:**
+**Response:**
 ```json
 {
-  "idCliente": 1,
-  "contexto": "Cliente interesado en laptops"
+  "contexto": "Recomendaciones para colaborador 1",
+  "respuesta": "Con base en el análisis del inventario, te recomiendo promover estos 5 productos:\n\n1. Laptop HP Pavilion 15\n2. Monitor LG 24'\n3. Teclado Mecánico RGB\n4. Mouse Logitech MX Master 3\n5. Webcam Logitech C920",
+  "exito": true
 }
 ```
+
+### 3. Analizar Datos de Ventas (Solo Admin/Gerente)
+**Endpoint:** `GET /ai/analysis/{idSucursal}`
+**Headers:** `Authorization: Bearer {token}`
 
 ---
 
@@ -1466,7 +1636,7 @@ http://localhost:8080/api
 ### Autenticación
 - Todos los endpoints (excepto login y registro) requieren el header: `Authorization: Bearer {token}`
 - Los tokens tienen una duración de 24 horas
-- Existen dos tipos de tokens: ERP (colaboradores) y WEB/MÓVIL (clientes)
+
 
 ### Códigos de Estado HTTP
 - `200 OK`: Operación exitosa
@@ -1515,13 +1685,18 @@ Ejemplo: `GET /productos?page=0&size=10&sort=nombreProducto,asc`
 
 Esta sección detalla las áreas de mejora identificadas para alcanzar una madurez completa de la API.
 
-### 🔹 Inteligencia Artificial Contextual
+### ✅ Inteligencia Artificial Contextual (IMPLEMENTADO)
+- ✅ **Control de Acceso por Permisos:** El sistema de IA ahora valida automáticamente los permisos del colaborador antes de procesar consultas.
+- ✅ **Detección Automática de Contexto:** No es necesario especificar el contexto manualmente, el sistema detecta el tipo de consulta automáticamente.
+- ✅ **Filtrado de Datos Sensibles:** Vendedores no pueden acceder a información de ventas o reportes.
+
+**Pendiente:**
 - **Endpoints Específicos:** Faltan endpoints dedicados para generar contenido con contexto específico, como:
   - `POST /ai/generar-campania`: Para crear descripciones y estrategias de campañas basadas en tendencias.
   - `POST /ai/producto-promocion`: Para sugerir qué productos poner en promoción según stock y ventas históricas.
-- **Ejemplos de Uso:** Falta documentar ejemplos concretos del uso de `GeminiAIService` pasando el parámetro `contextoModulo` para afinar las respuestas de la IA.
 
 ### 🔹 Seguridad y Control de Acceso Granular
+- ✅ **Validación de Permisos en IA:** Implementado sistema de validación basado en módulos (`PRODUCTOS`, `VENTAS`, `REPORTES`).
 - **Roles por Endpoint:** La documentación actual no especifica explícitamente qué roles (ADMIN, GERENTE, VENDEDOR, CLIENTE) son necesarios para cada endpoint individual.
 - **Validación de Tipo de Acceso:** No se aclara cómo se valida el `tipoAcceso` del rol (ERP vs WEB vs MÓVIL) en cada endpoint para prevenir accesos cruzados no autorizados.
 - **Integración Swagger:** Falta explicar cómo se visualizan los módulos en Swagger UI según los permisos del usuario autenticado.
@@ -1544,3 +1719,4 @@ Esta sección detalla las áreas de mejora identificadas para alcanzar una madur
 ### 🔹 Flujos de Negocio Complejos
 - **Conversión Automática:** Faltan endpoints o documentación sobre el proceso de cierre automático de `Pedido` a `Venta` (conversión) y cómo se maneja la transacción.
 - **Logística y Transporte:** No se mencionan endpoints para la transferencia de pedidos hacia un módulo de logística móvil o integración con proveedores de transporte.
+
