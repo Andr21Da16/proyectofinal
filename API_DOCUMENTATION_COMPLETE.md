@@ -1561,18 +1561,9 @@ DELETE /proveedores/remover-producto?idProducto=1&idProveedor=1
 
 ## 🤖 Asistente AI
 
-> [!IMPORTANT]
-> **Sistema de Permisos Basado en Roles:**
-> El asistente de IA filtra automáticamente las consultas según los permisos del colaborador. No es necesario especificar el contexto manualmente.
-
-### Permisos por Rol
-
-| Tipo de Consulta | Vendedor | Gerente | Administrador |
-|-----------------|----------|---------|---------------|
-| Productos e Inventario | ✅ | ✅ | ✅ |
-| Recomendaciones | ✅ | ✅ | ✅ |
-| Ventas y Transacciones | ❌ | ✅ | ✅ |
-| Reportes y Análisis | ❌ | ✅ | ✅ |
+> [!NOTE]
+> **Acceso Total al ERP:**
+> El asistente de IA tiene acceso completo a la información del ERP (Productos, Ventas, Inventario) para responder consultas de cualquier colaborador, sin restricciones de rol.
 
 ### 1. Consultar al Asistente
 **Endpoint:** `POST /ai/query`
@@ -1582,23 +1573,6 @@ DELETE /proveedores/remover-producto?idProducto=1&idProveedor=1
 ```json
 {
   "idColaborador": 1,
-  "query": "¿Qué laptop recomiendas para un estudiante de ingeniería?"
-}
-```
-
-**Response (Vendedor - Permitido):**
-```json
-{
-  "contexto": "¿Qué laptop recomiendas para un estudiante de ingeniería?",
-  "respuesta": "Basándome en el inventario actual, te recomiendo la Laptop HP Pavilion 15 con procesador Intel Core i5, 8GB RAM y 256GB SSD. Ideal para programación y aplicaciones de ingeniería básicas.",
-  "exito": true
-}
-```
-
-**Request Body (Vendedor consultando ventas - Denegado):**
-```json
-{
-  "idColaborador": 2,
   "query": "¿Cuánto vendimos el mes pasado?"
 }
 ```
@@ -1607,8 +1581,8 @@ DELETE /proveedores/remover-producto?idProducto=1&idProveedor=1
 ```json
 {
   "contexto": "¿Cuánto vendimos el mes pasado?",
-  "respuesta": "Lo siento, no tienes permisos para consultar información de ventas. Esta función está disponible solo para administradores y gerentes. Puedes preguntarme sobre productos, inventario o recomendaciones.",
-  "exito": false
+  "respuesta": "Basándome en los datos del ERP, las ventas del último mes ascendieron a S/ 45,230.50 con un total de 120 transacciones.",
+  "exito": true
 }
 ```
 
@@ -1625,7 +1599,8 @@ DELETE /proveedores/remover-producto?idProducto=1&idProveedor=1
 }
 ```
 
-### 3. Analizar Datos de Ventas (Solo Admin/Gerente)
+### 3. Analizar Datos de Ventas
+
 **Endpoint:** `GET /ai/analysis/{idSucursal}`
 **Headers:** `Authorization: Bearer {token}`
 
