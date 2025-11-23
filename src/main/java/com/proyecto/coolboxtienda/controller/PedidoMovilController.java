@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/movil")
+@RequestMapping("/movil")
 @RequiredArgsConstructor
 public class PedidoMovilController {
 
