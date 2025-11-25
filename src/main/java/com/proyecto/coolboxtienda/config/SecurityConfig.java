@@ -53,6 +53,7 @@ public class SecurityConfig {
                         // Permitir consulta pública de productos por sucursal (solo GET)
                         .requestMatchers(HttpMethod.GET, "/productos/sucursal/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/productos/all-branches").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
