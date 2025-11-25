@@ -11,9 +11,7 @@ import com.proyecto.coolboxtienda.repository.ClienteRepository;
 import com.proyecto.coolboxtienda.security.JwtTokenProvider;
 import com.proyecto.coolboxtienda.service.ClienteAuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,7 +29,6 @@ public class ClienteAuthServiceImpl implements ClienteAuthService {
     private final CiudadRepository ciudadRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final AuthenticationManager authenticationManager;
 
     @Override
     @Transactional
@@ -83,13 +80,14 @@ public class ClienteAuthServiceImpl implements ClienteAuthService {
 
     @Override
     public AuthResponse login(ClienteLoginRequest request) {
-        // Autenticar
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-
         // Obtener cliente
         Cliente cliente = clienteRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+
+        // Validar contraseña
+        if (!passwordEncoder.matches(request.getPassword(), cliente.getPassword())) {
+            throw new RuntimeException("Credenciales inválidas");
+        }
 
         if (!cliente.getActivo()) {
             throw new RuntimeException("Cliente inactivo");
@@ -100,8 +98,7 @@ public class ClienteAuthServiceImpl implements ClienteAuthService {
         extraClaims.put("tipoUsuario", "CLIENTE");
         extraClaims.put("idCliente", cliente.getIdCliente());
 
-        org.springframework.security.core.userdetails.UserDetails userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication
-                .getPrincipal();
+        User userDetails = new User(cliente.getEmail(), cliente.getPassword(), new ArrayList<>());
         String token = jwtTokenProvider.generateTokenWithClaims(userDetails, extraClaims);
 
         return AuthResponse.builder()
