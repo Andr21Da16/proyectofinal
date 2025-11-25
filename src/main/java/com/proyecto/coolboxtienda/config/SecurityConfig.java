@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/productos/sucursal/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/productos/all-branches").permitAll()
                         .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
