@@ -23,6 +23,7 @@ public class InventarioServiceImpl implements InventarioService {
         private final SucursalRepository sucursalRepository;
         private final ProveedorRepository proveedorRepository;
         private final EntityMapper entityMapper;
+        private final MovimientoInventarioRepository movimientoInventarioRepository;
 
         @Override
         @Transactional
@@ -53,6 +54,10 @@ public class InventarioServiceImpl implements InventarioService {
                 sucursalProducto.setPrecioProducto(request.getPrecioProducto());
 
                 sucursalProductoRepository.save(sucursalProducto);
+
+                // Registrar movimiento
+                registrarMovimiento(producto, sucursal, proveedor, "ENTRADA", request.getStockProducto(),
+                                "Ingreso de stock");
         }
 
         @Override
@@ -66,6 +71,11 @@ public class InventarioServiceImpl implements InventarioService {
                 sucursalProducto.setStockProducto(request.getStockProducto());
                 sucursalProducto.setPrecioProducto(request.getPrecioProducto());
                 sucursalProductoRepository.save(sucursalProducto);
+
+                // Registrar movimiento (AJUSTE)
+                registrarMovimiento(sucursalProducto.getProducto(), sucursalProducto.getSucursal(),
+                                sucursalProducto.getProveedor(), "AJUSTE", request.getStockProducto(),
+                                "Ajuste de inventario");
         }
 
         @Override
@@ -106,6 +116,15 @@ public class InventarioServiceImpl implements InventarioService {
 
                 destino.setStockProducto(destino.getStockProducto() + request.getCantidad());
                 sucursalProductoRepository.save(destino);
+
+                // Registrar movimientos
+                registrarMovimiento(origen.getProducto(), origen.getSucursal(), origen.getProveedor(),
+                                "TRANSFERENCIA_SALIDA", request.getCantidad(),
+                                "Transferencia a sucursal " + request.getIdSucursalDestino());
+
+                registrarMovimiento(destino.getProducto(), destino.getSucursal(), destino.getProveedor(),
+                                "TRANSFERENCIA_ENTRADA", request.getCantidad(),
+                                "Transferencia desde sucursal " + request.getIdSucursalOrigen());
         }
 
         @Override
@@ -158,5 +177,19 @@ public class InventarioServiceImpl implements InventarioService {
                                 .stockProducto(sp.getStockProducto())
                                 .precioProducto(sp.getPrecioProducto())
                                 .build();
+        }
+
+        private void registrarMovimiento(Producto producto, Sucursal sucursal, Proveedor proveedor,
+                        String tipoMovimiento, Integer cantidad, String motivo) {
+                MovimientoInventario movimiento = new MovimientoInventario();
+                movimiento.setProducto(producto);
+                movimiento.setSucursal(sucursal);
+                movimiento.setProveedor(proveedor);
+                movimiento.setTipoMovimiento(tipoMovimiento);
+                movimiento.setCantidad(cantidad);
+                movimiento.setMotivo(motivo);
+                // movimiento.setUsuario(SecurityContextHolder.getContext().getAuthentication().getName());
+                // // Si se implementa seguridad
+                movimientoInventarioRepository.save(movimiento);
         }
 }
