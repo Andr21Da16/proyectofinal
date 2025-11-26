@@ -68,14 +68,34 @@ public class InventarioServiceImpl implements InventarioService {
                 SucursalProducto sucursalProducto = sucursalProductoRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("Inventario no encontrado"));
 
-                sucursalProducto.setStockProducto(request.getStockProducto());
+                String tipoMovimiento = "AJUSTE";
+                String motivo = "Ajuste de inventario";
+
+                if ("ENTRADA".equalsIgnoreCase(request.getTipoAjuste())) {
+                        sucursalProducto.setStockProducto(
+                                        sucursalProducto.getStockProducto() + request.getStockProducto());
+                        tipoMovimiento = "ENTRADA";
+                        motivo = "Ajuste de entrada (Suma)";
+                } else if ("SALIDA".equalsIgnoreCase(request.getTipoAjuste())) {
+                        if (sucursalProducto.getStockProducto() < request.getStockProducto()) {
+                                throw new RuntimeException("Stock insuficiente para realizar la salida");
+                        }
+                        sucursalProducto.setStockProducto(
+                                        sucursalProducto.getStockProducto() - request.getStockProducto());
+                        tipoMovimiento = "SALIDA";
+                        motivo = "Ajuste de salida (Resta)";
+                } else {
+                        // Comportamiento por defecto: Reemplazo directo (AJUSTE)
+                        sucursalProducto.setStockProducto(request.getStockProducto());
+                }
+
                 sucursalProducto.setPrecioProducto(request.getPrecioProducto());
                 sucursalProductoRepository.save(sucursalProducto);
 
-                // Registrar movimiento (AJUSTE)
+                // Registrar movimiento
                 registrarMovimiento(sucursalProducto.getProducto(), sucursalProducto.getSucursal(),
-                                sucursalProducto.getProveedor(), "AJUSTE", request.getStockProducto(),
-                                "Ajuste de inventario");
+                                sucursalProducto.getProveedor(), tipoMovimiento, request.getStockProducto(),
+                                motivo);
         }
 
         @Override
@@ -115,6 +135,10 @@ public class InventarioServiceImpl implements InventarioService {
                                 });
 
                 destino.setStockProducto(destino.getStockProducto() + request.getCantidad());
+                // Asegurar que el precio se mantenga/actualice al de la sucursal origen
+                if (origen.getPrecioProducto() != null) {
+                        destino.setPrecioProducto(origen.getPrecioProducto());
+                }
                 sucursalProductoRepository.save(destino);
 
                 // Registrar movimientos

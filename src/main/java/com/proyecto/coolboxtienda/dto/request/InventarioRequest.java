@@ -29,4 +29,6 @@ public class InventarioRequest {
     @NotNull(message = "El precio es obligatorio")
     @Min(value = 0, message = "El precio debe ser mayor a 0")
     private BigDecimal precioProducto;
+
+    private String tipoAjuste; // "ENTRADA", "SALIDA", o null/"AJUSTE"
 }
