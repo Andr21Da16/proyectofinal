@@ -88,8 +88,7 @@ public class ProductoServiceImpl implements ProductoService {
     public void deleteProducto(Integer id) {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-        producto.setActivo(false);
-        productoRepository.save(producto);
+        productoRepository.delete(producto);
     }
 
     @Override
