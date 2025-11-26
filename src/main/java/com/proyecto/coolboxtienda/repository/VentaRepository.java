@@ -103,4 +103,6 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
         Long countVentasByColaboradorSinceFecha(
                         @Param("idColaborador") Integer idColaborador,
                         @Param("fechaInicio") LocalDateTime fechaInicio);
+
+        List<Venta> findByCliente_IdCliente(Integer idCliente);
 }

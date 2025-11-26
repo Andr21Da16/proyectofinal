@@ -24,6 +24,12 @@ public class PedidoServiceImpl implements PedidoService {
         private final ProductoRepository productoRepository;
         private final SucursalRepository sucursalRepository;
         private final CuponRepository cuponRepository;
+        private final VentaRepository ventaRepository;
+        private final DetalleVentaRepository detalleVentaRepository;
+        private final CarritoComprasRepository carritoComprasRepository;
+        private final ColaboradorRepository colaboradorRepository;
+        private final EstadoVentaRepository estadoVentaRepository;
+        private final ProductoProveedorRepository productoProveedorRepository;
 
         @Override
         public List<PedidoResponse> getAllPedidos() {
@@ -131,7 +137,8 @@ public class PedidoServiceImpl implements PedidoService {
                                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
                 pedido.setEstadoLogistico("ENTREGADO");
                 pedido.setFechaEntrega(LocalDateTime.now());
-                // TODO: Generar venta automáticamente
+                // Generar venta automáticamente
+                generarVentaDesdePedido(pedido);
                 pedido = pedidoRepository.save(pedido);
                 return toPedidoResponse(pedido);
         }
@@ -192,5 +199,75 @@ public class PedidoServiceImpl implements PedidoService {
                                 .precioUnitario(item.getPrecioUnitario())
                                 .subtotal(item.getSubtotal())
                                 .build();
+        }
+
+        private void generarVentaDesdePedido(Pedido pedido) {
+                // 1. Obtener sucursal y colaborador (asignar uno activo de la sucursal)
+                Sucursal sucursal = pedido.getSucursal();
+                if (sucursal == null) {
+                        throw new RuntimeException("El pedido no tiene sucursal asignada");
+                }
+
+                List<Colaborador> colaboradores = colaboradorRepository
+                                .findBySucursal_IdSucursalAndActivoTrue(sucursal.getIdSucursal());
+                if (colaboradores.isEmpty()) {
+                        throw new RuntimeException("No hay colaboradores activos en la sucursal para asignar la venta");
+                }
+                Colaborador colaborador = colaboradores.get(0);
+
+                // 2. Crear Carrito de Compras para la venta
+                CarritoCompras carrito = new CarritoCompras();
+                carrito.setColaborador(colaborador);
+                carrito.setActivo(false); // Ya se procesó
+                carrito = carritoComprasRepository.save(carrito);
+
+                // 3. Crear Venta
+                Venta venta = new Venta();
+                venta.setCarrito(carrito);
+                venta.setColaborador(colaborador);
+                venta.setSucursal(sucursal);
+                venta.setCliente(pedido.getCliente());
+                venta.setPedido(pedido);
+                venta.setTotal(pedido.getTotal());
+                venta.setMetodoPago(pedido.getMetodoPago());
+                venta.setDescuentoAplicado(pedido.getDescuentoAplicado());
+                venta.setFechaVenta(LocalDateTime.now());
+
+                EstadoVenta estadoCompletada = estadoVentaRepository.findByNombreEstado("COMPLETADA")
+                                .orElseThrow(() -> new RuntimeException("Estado de venta COMPLETADA no encontrado"));
+                venta.setEstadoVenta(estadoCompletada);
+
+                venta = ventaRepository.save(venta);
+
+                // 4. Crear Detalles de Venta
+                List<PedidoItem> items = pedidoItemRepository.findByPedido_IdPedido(pedido.getIdPedido());
+                for (PedidoItem item : items) {
+                        Producto producto = item.getProducto();
+
+                        // Buscar proveedor del producto (usamos el primero encontrado o el que tenga
+                        // stock)
+                        List<ProductoProveedor> proveedores = productoProveedorRepository
+                                        .findByProducto_IdProducto(producto.getIdProducto());
+                        if (proveedores.isEmpty()) {
+                                throw new RuntimeException("El producto " + producto.getNombreProducto()
+                                                + " no tiene proveedores asignados");
+                        }
+                        Proveedor proveedor = proveedores.get(0).getProveedor();
+
+                        DetalleVenta detalle = new DetalleVenta();
+                        detalle.setVenta(venta);
+                        detalle.setSucursal(sucursal);
+                        detalle.setProducto(producto);
+                        detalle.setProveedor(proveedor);
+                        detalle.setCantidad(item.getCantidad());
+                        detalle.setPrecioUnitario(item.getPrecioUnitario());
+                        detalle.setDescuento(BigDecimal.ZERO); // El descuento ya se aplicó al total de la venta si hubo
+                                                               // cupón
+
+                        detalleVentaRepository.save(detalle);
+                }
+
+                // Actualizar referencia en el pedido
+                pedido.setIdVentaGenerada(venta.getIdVenta());
         }
 }

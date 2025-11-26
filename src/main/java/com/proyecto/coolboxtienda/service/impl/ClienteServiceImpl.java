@@ -3,6 +3,7 @@ package com.proyecto.coolboxtienda.service.impl;
 import com.proyecto.coolboxtienda.dto.request.ClienteRequest;
 import com.proyecto.coolboxtienda.dto.response.ClienteAnalyticsResponse;
 import com.proyecto.coolboxtienda.dto.response.ClienteResponse;
+import com.proyecto.coolboxtienda.dto.response.DetalleVentaResponse;
 import com.proyecto.coolboxtienda.dto.response.VentaResponse;
 import com.proyecto.coolboxtienda.entity.Ciudad;
 import com.proyecto.coolboxtienda.entity.Cliente;
@@ -23,6 +24,8 @@ public class ClienteServiceImpl implements ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final CiudadRepository ciudadRepository;
+    private final com.proyecto.coolboxtienda.repository.VentaRepository ventaRepository;
+    private final com.proyecto.coolboxtienda.repository.DetalleVentaRepository detalleVentaRepository;
 
     @Override
     public List<ClienteResponse> getAllClientes() {
@@ -136,9 +139,9 @@ public class ClienteServiceImpl implements ClienteService {
         clienteRepository.findById(idCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        // TODO: Implementar cuando se cree la relación Cliente-Venta
-        // Por ahora retornamos lista vacía
-        return List.of();
+        return ventaRepository.findByCliente_IdCliente(idCliente).stream()
+                .map(this::toVentaResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -146,15 +149,59 @@ public class ClienteServiceImpl implements ClienteService {
         Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        // TODO: Implementar cuando se cree la relación Cliente-Venta
-        // Por ahora retornamos analytics básicos
+        List<com.proyecto.coolboxtienda.entity.Venta> ventas = ventaRepository.findByCliente_IdCliente(idCliente);
+
+        long totalCompras = ventas.size();
+        BigDecimal montoTotal = ventas.stream()
+                .map(com.proyecto.coolboxtienda.entity.Venta::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal promedioCompra = totalCompras > 0
+                ? montoTotal.divide(BigDecimal.valueOf(totalCompras), 2, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        String frecuenciaCompra = "BAJA";
+        if (totalCompras > 10)
+            frecuenciaCompra = "ALTA";
+        else if (totalCompras > 5)
+            frecuenciaCompra = "MEDIA";
+
         return ClienteAnalyticsResponse.builder()
                 .idCliente(cliente.getIdCliente())
                 .nombreCompleto(cliente.getNombreCompleto())
-                .totalCompras(0L)
-                .montoTotal(BigDecimal.ZERO)
-                .promedioCompra(BigDecimal.ZERO)
-                .frecuenciaCompra("BAJA")
+                .totalCompras(totalCompras)
+                .montoTotal(montoTotal)
+                .promedioCompra(promedioCompra)
+                .frecuenciaCompra(frecuenciaCompra)
+                .build();
+    }
+
+    private VentaResponse toVentaResponse(com.proyecto.coolboxtienda.entity.Venta venta) {
+        List<com.proyecto.coolboxtienda.entity.DetalleVenta> detalles = detalleVentaRepository
+                .findByVenta_IdVenta(venta.getIdVenta());
+
+        return VentaResponse.builder()
+                .idVenta(venta.getIdVenta())
+                .fechaVenta(venta.getFechaVenta())
+                .totalVenta(venta.getTotal())
+                .metodoPago(venta.getMetodoPago())
+                .estadoVenta(venta.getEstadoVenta().getNombreEstado())
+                .nombreColaborador(venta.getColaborador().getNombreColaborador())
+                .nombreSucursal(venta.getSucursal().getNombreSucursal())
+                .detalles(detalles.stream().map(this::toDetalleResponse).collect(Collectors.toList()))
+                .build();
+    }
+
+    private DetalleVentaResponse toDetalleResponse(com.proyecto.coolboxtienda.entity.DetalleVenta detalle) {
+        return DetalleVentaResponse.builder()
+                .nombreProducto(detalle.getProducto().getNombreProducto())
+                .marcaProducto(detalle.getProducto().getMarcaProducto())
+                .nombreProveedor(detalle.getProveedor().getNombreProveedor())
+                .cantidad(detalle.getCantidad())
+                .precioUnitario(detalle.getPrecioUnitario())
+                .descuento(detalle.getDescuento())
+                .subtotal(detalle.getPrecioUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad()))
+                        .subtract(detalle.getDescuento()))
                 .build();
     }
 

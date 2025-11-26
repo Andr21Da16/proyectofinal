@@ -39,7 +39,7 @@ public class GeminiAIServiceImpl implements GeminiAIService {
             Colaborador colaborador = colaboradorRepository.findById(request.getIdColaborador())
                     .orElseThrow(() -> new RuntimeException("Colaborador no encontrado"));
 
-            // IA LIBERADA: Acceso total al sistema ERP sin restricciones de rol
+            // IA LIBERADA
             // Se ignora la validación de permisos y se entrega todo el contexto
 
             // Construir contexto completo
