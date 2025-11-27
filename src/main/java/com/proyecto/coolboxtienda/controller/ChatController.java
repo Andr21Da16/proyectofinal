@@ -66,4 +66,10 @@ public class ChatController {
         chatService.unpinMessage(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/messages")
+    public ResponseEntity<ChatMessageResponse> sendMessage(
+            @Valid @RequestBody com.proyecto.coolboxtienda.dto.request.ChatMessageRequest request) {
+        return ResponseEntity.ok(chatService.sendMessage(request));
+    }
 }
