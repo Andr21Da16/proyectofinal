@@ -1,5 +1,6 @@
 package com.proyecto.coolboxtienda.controller;
 
+import com.proyecto.coolboxtienda.dto.response.MovimientoInventarioResponse;
 import com.proyecto.coolboxtienda.dto.request.InventarioRequest;
 import com.proyecto.coolboxtienda.dto.request.TransferenciaRequest;
 import com.proyecto.coolboxtienda.dto.response.SucursalProductoResponse;
@@ -50,5 +51,11 @@ public class InventarioController {
     @GetMapping("/low-stock")
     public ResponseEntity<List<SucursalProductoResponse>> getLowStockProducts(@RequestParam Integer threshold) {
         return ResponseEntity.ok(inventarioService.getLowStockProducts(threshold));
+    }
+
+    @GetMapping("/movimientos")
+    public ResponseEntity<List<MovimientoInventarioResponse>> getRecentMovements(
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return ResponseEntity.ok(inventarioService.getRecentMovements(limit));
     }
 }

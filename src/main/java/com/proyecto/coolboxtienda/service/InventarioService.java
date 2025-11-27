@@ -20,4 +20,6 @@ public interface InventarioService {
     List<SucursalProductoResponse> getLowStockProducts(Integer threshold);
 
     boolean checkAvailability(Integer idProducto, Integer idSucursal, Integer idProveedor, Integer cantidad);
+
+    List<com.proyecto.coolboxtienda.dto.response.MovimientoInventarioResponse> getRecentMovements(Integer limit);
 }

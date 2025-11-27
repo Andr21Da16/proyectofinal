@@ -2,7 +2,10 @@ package com.proyecto.coolboxtienda.service.impl;
 
 import com.proyecto.coolboxtienda.dto.request.InventarioRequest;
 import com.proyecto.coolboxtienda.dto.request.TransferenciaRequest;
+import com.proyecto.coolboxtienda.dto.response.MovimientoInventarioResponse;
 import com.proyecto.coolboxtienda.dto.response.SucursalProductoResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import com.proyecto.coolboxtienda.entity.*;
 import com.proyecto.coolboxtienda.mapper.EntityMapper;
 import com.proyecto.coolboxtienda.repository.*;
@@ -215,5 +218,29 @@ public class InventarioServiceImpl implements InventarioService {
                 // movimiento.setUsuario(SecurityContextHolder.getContext().getAuthentication().getName());
                 // // Si se implementa seguridad
                 movimientoInventarioRepository.save(movimiento);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<MovimientoInventarioResponse> getRecentMovements(Integer limit) {
+                return movimientoInventarioRepository
+                                .findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "fechaMovimiento")))
+                                .stream()
+                                .map(this::toMovimientoInventarioResponse)
+                                .collect(Collectors.toList());
+        }
+
+        private MovimientoInventarioResponse toMovimientoInventarioResponse(MovimientoInventario movimiento) {
+                return MovimientoInventarioResponse.builder()
+                                .idMovimiento(movimiento.getIdMovimiento())
+                                .nombreProducto(movimiento.getProducto().getNombreProducto())
+                                .nombreSucursal(movimiento.getSucursal().getNombreSucursal())
+                                .nombreProveedor(movimiento.getProveedor().getNombreProveedor())
+                                .tipoMovimiento(movimiento.getTipoMovimiento())
+                                .cantidad(movimiento.getCantidad())
+                                .fechaMovimiento(movimiento.getFechaMovimiento())
+                                .motivo(movimiento.getMotivo())
+                                .usuario(movimiento.getUsuario())
+                                .build();
         }
 }
