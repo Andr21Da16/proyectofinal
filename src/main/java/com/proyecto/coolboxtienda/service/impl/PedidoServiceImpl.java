@@ -233,7 +233,7 @@ public class PedidoServiceImpl implements PedidoService {
                 venta.setDescuentoAplicado(pedido.getDescuentoAplicado());
                 venta.setFechaVenta(LocalDateTime.now());
 
-                EstadoVenta estadoCompletada = estadoVentaRepository.findByNombreEstado("COMPLETADA")
+                EstadoVenta estadoCompletada = estadoVentaRepository.findByNombreEstado("COMPLETADO")
                                 .orElseThrow(() -> new RuntimeException("Estado de venta COMPLETADA no encontrado"));
                 venta.setEstadoVenta(estadoCompletada);
 
