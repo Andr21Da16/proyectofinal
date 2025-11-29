@@ -55,8 +55,8 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     public void deleteColaborador(Integer id) {
         Colaborador colaborador = colaboradorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Colaborador no encontrado"));
-        colaborador.setActivo(false);
-        colaboradorRepository.save(colaborador);
+
+        colaboradorRepository.delete(colaborador);
     }
 
     @Override

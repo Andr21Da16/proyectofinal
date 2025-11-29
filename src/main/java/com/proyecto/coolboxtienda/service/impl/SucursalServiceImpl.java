@@ -55,8 +55,8 @@ public class SucursalServiceImpl implements SucursalService {
     public void deleteSucursal(Integer id) {
         Sucursal sucursal = sucursalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sucursal no encontrada"));
-        sucursal.setActivo(false);
-        sucursalRepository.save(sucursal);
+
+        sucursalRepository.delete(sucursal);
     }
 
     @Override
